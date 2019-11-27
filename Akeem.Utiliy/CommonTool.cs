@@ -1,13 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Akeem.Utiliy
 {
@@ -25,6 +21,10 @@ namespace Akeem.Utiliy
         /// <param name="value"></param>
         public static void Set<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key, TValue value)
         {
+            if (dic is null)
+            {
+                throw new ArgumentNullException(nameof(dic));
+            }
             if (dic.ContainsKey(key))
             {
                 dic[key] = value;
@@ -37,13 +37,17 @@ namespace Akeem.Utiliy
 
         public static TValue Get<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key)
         {
+            if (dic is null)
+            {
+                throw new ArgumentNullException(nameof(dic));
+            }
             if (dic.ContainsKey(key))
             {
                 return dic[key];
             }
             else
             {
-                return default(TValue);
+                return default;
             }
         }
 
@@ -55,7 +59,7 @@ namespace Akeem.Utiliy
         /// <param name="dic"></param>
         /// <param name="key">主键</param>
         /// <param name="value">值</param>
-        public static void AddString<TKey, TValue>(this Dictionary<TKey, string> dic, TKey key, TValue value)
+        public static void SetString<TKey, TValue>(this Dictionary<TKey, string> dic, TKey key, TValue value)
         {
             if (value.GetType().IsValueType)
             {
@@ -69,12 +73,7 @@ namespace Akeem.Utiliy
 
         public static decimal GetDecimal<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key)
         {
-            TValue value = dic.Get(key);
-            decimal v = default;
-            if (value.GetType().IsValueType)
-            {
-                decimal.TryParse(Convert.ToString(value), out v);
-            }
+            decimal.TryParse(dic.GetString(key), out decimal v);
             return v;
         }
 
@@ -95,7 +94,7 @@ namespace Akeem.Utiliy
 
         public static float GetFloat<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key)
         {
-            return (float)(dic.GetDouble(key));
+            return (float)(dic.GetDecimal(key));
         }
 
         public static bool GetBoolean<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key)
@@ -145,15 +144,17 @@ namespace Akeem.Utiliy
         /// <returns></returns>
         public static string ToMD5(this string message, bool lower = true)
         {
-            MD5 md5 = new MD5CryptoServiceProvider();
-            byte[] result = Encoding.UTF8.GetBytes(message);
-            byte[] outStr = md5.ComputeHash(result);
-            string md5string = BitConverter.ToString(outStr).Replace("-", "");
-            if (lower)
+            using (MD5 md5 = new MD5CryptoServiceProvider())
             {
-                md5string = md5string.ToLower();
+                byte[] result = Encoding.UTF8.GetBytes(message);
+                byte[] outStr = md5.ComputeHash(result);
+                string md5string = BitConverter.ToString(outStr).Replace("-", "");
+                if (lower)
+                {
+                    md5string = md5string.ToLower();
+                }
+                return md5string;
             }
-            return md5string;
         }
 
         #endregion 加密
@@ -216,6 +217,7 @@ namespace Akeem.Utiliy
         #endregion 复制一个对象
 
         #region 在线翻译
+
         /// <summary>
         /// 在线翻译
         /// </summary>
@@ -227,7 +229,7 @@ namespace Akeem.Utiliy
         {
             return TranslateTool.Translate(from, to, text);
         }
-        #endregion
 
+        #endregion 在线翻译
     }
 }

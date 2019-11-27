@@ -65,7 +65,7 @@ namespace Akeem.Utiliy
         public static decimal GetDecimal<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key)
         {
             TValue value = dic.Get(key);
-            decimal v = default;
+            decimal v = default;      
             if (value.GetType().IsValueType)
             {
                 decimal.TryParse(Convert.ToString(value), out v);
